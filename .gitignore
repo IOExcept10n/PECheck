@@ -102,3 +102,4 @@ cmake-build-*/
 *.temp
 *.swp
 *.swo
+src/backend/appsettings.json
