@@ -16,10 +16,25 @@ class LogInViewModel: ViewModel() {
     private val _role = MutableStateFlow<UserRole?>(null)
     val role: StateFlow<UserRole?> = _role
 
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     fun login(username: String, password: String) {
+        if (_loading.value) return
+        _loading.value = true
+        _error.value = null
         viewModelScope.launch {
-            val result = loginUseCase(username, password)
-            _role.value = result
+            try {
+                val result = loginUseCase(username, password)
+                _role.value = result
+            } catch (t: Throwable) {
+                _error.value = t.message ?: "Login failed"
+            } finally {
+                _loading.value = false
+            }
         }
     }
 } 

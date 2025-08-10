@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">#1E88E5</color>
+    <color name="colorOnPrimary">#FFFFFFFF</color>
+    <color name="colorBackground">#FFFFFFFF</color>
+    <color name="colorOnBackground">#FF000000</color>
+
+    <color name="attendance_attended">#2E7D32</color>
+    <color name="attendance_canceled">#C62828</color>
 </resources>

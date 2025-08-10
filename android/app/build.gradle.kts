@@ -36,11 +36,12 @@ android {
 }
 
 dependencies {
-    // CameraX temporarily removed to avoid fetching from Maven Central while offline
+    // CameraX/ML Kit removed due to repository access issues; using external scanner intent fallback
     // implementation("androidx.camera:camera-core:1.4.0-beta03")
     // implementation("androidx.camera:camera-camera2:1.4.0-beta03")
     // implementation("androidx.camera:camera-lifecycle:1.4.0-beta03")
     // implementation("androidx.camera:camera-view:1.4.0-beta03")
+    // implementation(libs.mlkit.barcode.scanning)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -59,8 +60,12 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // ML Kit temporarily removed to avoid fetching from Maven Central while offline
-    // implementation(libs.mlkit.barcode.scanning)
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.moshi.kotlin)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
