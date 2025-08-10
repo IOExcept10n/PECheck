@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -188,3 +189,163 @@ function handleLogin() {
   background: linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.2) 100%);
 }
 </style>
+=======
+<template>
+  <div class="login-container">
+    <div class="login-card glass-card">
+      <div class="login-header">
+        <h1 class="login-title">PE Check</h1>
+        <p class="login-subtitle">Student Attendance System</p>
+      </div>
+
+      <form @submit.prevent="handleLogin" class="login-form">
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            class="form-input"
+            placeholder="Enter your email"
+            required
+            :disabled="isLoading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            class="form-input"
+            placeholder="Enter your password"
+            required
+            :disabled="isLoading"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="btn w-100"
+          :disabled="isLoading"
+        >
+          <span v-if="isLoading">Signing in...</span>
+          <span v-else>Sign In</span>
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <p class="text-center">
+          Don't have an account? 
+          <a href="#" @click.prevent="showRegister = true" class="link">Register</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { toast } from 'vue3-toastify'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const email = ref('')
+const password = ref('')
+const isLoading = ref(false)
+
+const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    toast.error('Please fill in all fields')
+    return
+  }
+
+  try {
+    isLoading.value = true
+    await authStore.login({
+      email: email.value,
+      password: password.value
+    })
+
+    toast.success('Login successful!')
+    
+    // Redirect based on user role
+    const roleRoutes = {
+      student: '/student',
+      teacher: '/teacher',
+      moderator: '/moderator'
+    }
+    
+    const route = roleRoutes[authStore.user?.role as keyof typeof roleRoutes] || '/'
+    router.push(route)
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || 'Login failed')
+  } finally {
+    isLoading.value = false
+  }
+}
+</script>
+
+<style scoped>
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2.5rem;
+  text-align: center;
+}
+
+.login-header {
+  margin-bottom: 2rem;
+}
+
+.login-title {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.login-subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.login-form {
+  margin-bottom: 1.5rem;
+}
+
+.login-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 1.5rem;
+}
+
+.link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+}
+</style> 
+>>>>>>> Stashed changes

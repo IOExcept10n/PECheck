@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+<<<<<<< Updated upstream
 import { ref } from 'vue'
 
 export interface Section {
@@ -135,3 +136,176 @@ export const useSectionsStore = defineStore('sections', () => {
     removeReview
   }
 })
+=======
+import { ref, computed } from 'vue'
+import { sectionsApi } from '@/api/sections'
+
+export interface Section {
+  id: string
+  name: string
+  description: string
+  coverImage?: string
+  price: number
+  schedule: LessonSchedule[]
+  teacherId: string
+  teacherName: string
+  maxStudents?: number
+  currentStudents?: number
+}
+
+export interface LessonSchedule {
+  id: string
+  dayOfWeek: number // 0-6 (Sunday-Saturday)
+  startTime: string
+  endTime: string
+  room?: string
+}
+
+export interface SectionFilters {
+  search?: string
+  priceMin?: number
+  priceMax?: number
+  dayOfWeek?: number
+  teacherId?: string
+}
+
+export const useSectionsStore = defineStore('sections', () => {
+  const sections = ref<Section[]>([])
+  const currentSection = ref<Section | null>(null)
+  const isLoading = ref(false)
+  const filters = ref<SectionFilters>({})
+
+  const filteredSections = computed(() => {
+    let filtered = sections.value
+
+    if (filters.value.search) {
+      const search = filters.value.search.toLowerCase()
+      filtered = filtered.filter(section => 
+        section.name.toLowerCase().includes(search) ||
+        section.description.toLowerCase().includes(search) ||
+        section.teacherName.toLowerCase().includes(search)
+      )
+    }
+
+    if (filters.value.priceMin !== undefined) {
+      filtered = filtered.filter(section => section.price >= filters.value.priceMin!)
+    }
+
+    if (filters.value.priceMax !== undefined) {
+      filtered = filtered.filter(section => section.price <= filters.value.priceMax!)
+    }
+
+    if (filters.value.dayOfWeek !== undefined) {
+      filtered = filtered.filter(section => 
+        section.schedule.some(lesson => lesson.dayOfWeek === filters.value.dayOfWeek)
+      )
+    }
+
+    if (filters.value.teacherId) {
+      filtered = filtered.filter(section => section.teacherId === filters.value.teacherId)
+    }
+
+    return filtered
+  })
+
+  const fetchSections = async () => {
+    try {
+      isLoading.value = true
+      const data = await sectionsApi.getSections()
+      sections.value = data
+    } catch (error) {
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchSectionById = async (id: string) => {
+    try {
+      isLoading.value = true
+      const data = await sectionsApi.getSectionById(id)
+      currentSection.value = data
+      return data
+    } catch (error) {
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const createSection = async (sectionData: Omit<Section, 'id'>) => {
+    try {
+      isLoading.value = true
+      const newSection = await sectionsApi.createSection(sectionData)
+      sections.value.push(newSection)
+      return newSection
+    } catch (error) {
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const updateSection = async (id: string, sectionData: Partial<Section>) => {
+    try {
+      isLoading.value = true
+      const updatedSection = await sectionsApi.updateSection(id, sectionData)
+      
+      const index = sections.value.findIndex(s => s.id === id)
+      if (index !== -1) {
+        sections.value[index] = updatedSection
+      }
+      
+      if (currentSection.value?.id === id) {
+        currentSection.value = updatedSection
+      }
+      
+      return updatedSection
+    } catch (error) {
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const deleteSection = async (id: string) => {
+    try {
+      isLoading.value = true
+      await sectionsApi.deleteSection(id)
+      
+      sections.value = sections.value.filter(s => s.id !== id)
+      
+      if (currentSection.value?.id === id) {
+        currentSection.value = null
+      }
+    } catch (error) {
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const setFilters = (newFilters: SectionFilters) => {
+    filters.value = { ...filters.value, ...newFilters }
+  }
+
+  const clearFilters = () => {
+    filters.value = {}
+  }
+
+  return {
+    sections,
+    currentSection,
+    isLoading,
+    filters,
+    filteredSections,
+    fetchSections,
+    fetchSectionById,
+    createSection,
+    updateSection,
+    deleteSection,
+    setFilters,
+    clearFilters
+  }
+}) 
+>>>>>>> Stashed changes

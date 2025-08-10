@@ -1,21 +1,19 @@
 {
-  "name": "pecheck",
+  "name": "pecheck-frontend",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
   "scripts": {
-    "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build",
-    "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "format": "prettier --write src/",
+    "dev": "vite"
   },
   "dependencies": {
+<<<<<<< Updated upstream
     "@mdi/font": "^7.4.47",
     "@vueuse/core": "^13.6.0",
     "pinia": "^3.0.3",
@@ -24,22 +22,30 @@
     "vue-cal": "^4.10.2",
     "vue-router": "^4.5.1",
     "vuetify": "^3.9.4"
+=======
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.5",
+    "pinia": "^2.1.7",
+    "axios": "^1.6.0",
+    "qrcode": "^1.5.3",
+    "date-fns": "^2.30.0",
+    "vue3-toastify": "^0.2.7"
+>>>>>>> Stashed changes
   },
   "devDependencies": {
-    "@tsconfig/node22": "^22.0.2",
-    "@types/node": "^22.16.5",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vue/eslint-config-prettier": "^10.2.0",
-    "@vue/eslint-config-typescript": "^14.6.0",
-    "@vue/tsconfig": "^0.7.0",
-    "eslint": "^9.31.0",
-    "eslint-plugin-vue": "~10.3.0",
-    "jiti": "^2.4.2",
-    "npm-run-all2": "^8.0.4",
-    "prettier": "3.6.2",
-    "typescript": "~5.8.0",
-    "vite": "^7.0.6",
-    "vite-plugin-vue-devtools": "^8.0.0",
-    "vue-tsc": "^3.0.4"
+    "@rushstack/eslint-patch": "^1.3.3",
+    "@tsconfig/node18": "^18.2.2",
+    "@types/node": "^18.19.0",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "@vue/eslint-config-prettier": "^8.0.0",
+    "@vue/eslint-config-typescript": "^12.0.0",
+    "@vue/tsconfig": "^0.5.1",
+    "eslint": "^8.49.0",
+    "eslint-plugin-vue": "^9.17.0",
+    "npm-run-all2": "^6.1.1",
+    "prettier": "^3.0.3",
+    "typescript": "~5.3.0",
+    "vite": "^5.0.10",
+    "vue-tsc": "^1.8.25"
   }
-}
+} 

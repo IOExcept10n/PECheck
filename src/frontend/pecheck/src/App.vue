@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { useTheme } from 'vuetify'
@@ -160,3 +161,36 @@ watch(mobile, (isMobile) => {
   min-height: calc(100vh - 64px - 48px); /* Viewport height minus header and footer */
 }
 </style>
+=======
+<template>
+  <div id="app">
+    <router-view />
+  </div>
+</template>
+
+<script setup lang="ts">
+// Main app component
+</script>
+
+<style>
+#app {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+</style> 
+>>>>>>> Stashed changes

@@ -1,14 +1,20 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+<<<<<<< Updated upstream
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
+=======
+import { Toast, type PluginOptions } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
+>>>>>>> Stashed changes
 
 import App from './App.vue'
 import router from './router'
 
+<<<<<<< Updated upstream
 // Create vuetify instance
 const vuetify = createVuetify({
   components,
@@ -43,11 +49,23 @@ const vuetify = createVuetify({
     }
   }
 })
+=======
+import './assets/main.css'
+>>>>>>> Stashed changes
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
+<<<<<<< Updated upstream
 app.use(vuetify)
 
 app.mount('#app')
+=======
+app.use(Toast, {
+  autoClose: 3000,
+  position: 'top-right'
+} as PluginOptions)
+
+app.mount('#app') 
+>>>>>>> Stashed changes

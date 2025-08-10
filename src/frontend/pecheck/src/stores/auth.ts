@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+<<<<<<< Updated upstream
 import { ref } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -90,3 +91,93 @@ export const useAuthStore = defineStore('auth', () => {
     checkSavedAuth
   }
 })
+=======
+import { ref, computed } from 'vue'
+import { authApi } from '@/api/auth'
+
+export interface User {
+  id: string
+  email: string
+  fullName: string
+  role: 'student' | 'teacher' | 'moderator'
+  group?: string
+  course?: number
+  profilePicture?: string
+}
+
+export interface LoginCredentials {
+  email: string
+  password: string
+}
+
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<User | null>(null)
+  const token = ref<string | null>(localStorage.getItem('token'))
+  const isLoading = ref(false)
+
+  const isAuthenticated = computed(() => !!token.value && !!user.value)
+
+  const login = async (credentials: LoginCredentials) => {
+    try {
+      isLoading.value = true
+      const response = await authApi.login(credentials)
+      
+      token.value = response.token
+      user.value = response.user
+      
+      localStorage.setItem('token', response.token)
+      
+      return response
+    } catch (error) {
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const logout = () => {
+    user.value = null
+    token.value = null
+    localStorage.removeItem('token')
+  }
+
+  const loadUser = async () => {
+    if (!token.value) return
+
+    try {
+      isLoading.value = true
+      const userData = await authApi.getCurrentUser()
+      user.value = userData
+    } catch (error) {
+      logout()
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const updateProfile = async (profileData: Partial<User>) => {
+    try {
+      isLoading.value = true
+      const updatedUser = await authApi.updateProfile(profileData)
+      user.value = { ...user.value, ...updatedUser }
+      return updatedUser
+    } catch (error) {
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  return {
+    user,
+    token,
+    isLoading,
+    isAuthenticated,
+    login,
+    logout,
+    loadUser,
+    updateProfile
+  }
+}) 
+>>>>>>> Stashed changes
