@@ -4,45 +4,59 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.pecheck.R
+import com.example.pecheck.databinding.FragmentLogInBinding
 import com.example.pecheck.domain.model.UserRole
 import kotlinx.coroutines.flow.collectLatest
 
 class LogInFragment : Fragment() {
 
+    private var _binding: FragmentLogInBinding? = null
+    private val binding get() = _binding!!
+    
     private val viewModel: LogInViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_log_in, container, false)
+        _binding = FragmentLogInBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val etUsername = view.findViewById<EditText>(R.id.etUsername)
-        val etPassword = view.findViewById<EditText>(R.id.etPassword)
-        val btnLogin = view.findViewById<Button>(R.id.btnLogin)
-        val btnAsStudent = view.findViewById<Button>(R.id.btnAsStudent)
-        val btnAsTeacher = view.findViewById<Button>(R.id.btnAsTeacher)
+        
+        setupUI()
+        observeViewModel()
+    }
 
-        btnLogin.setOnClickListener {
-            viewModel.login(
-                etUsername.text?.toString().orEmpty(),
-                etPassword.text?.toString().orEmpty()
-            )
+    private fun setupUI() {
+        binding.btnLogin.setOnClickListener {
+            val username = binding.etUsername.text?.toString().orEmpty()
+            val password = binding.etPassword.text?.toString().orEmpty()
+            
+            if (username.isBlank() || password.isBlank()) {
+                Toast.makeText(requireContext(), "Заполните все поля", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            viewModel.login(username, password)
         }
 
-        btnAsStudent.setOnClickListener { navigateTo(StudentFragment()) }
-        btnAsTeacher.setOnClickListener { navigateTo(TeacherFragment()) }
+        binding.btnAsStudent.setOnClickListener { 
+            navigateTo(StudentFragment()) 
+        }
+        
+        binding.btnAsTeacher.setOnClickListener { 
+            navigateTo(TeacherFragment()) 
+        }
+    }
 
+    private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.role.collectLatest { role ->
                 when (role) {
@@ -54,9 +68,9 @@ class LogInFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.error.collectLatest { err ->
-                if (!err.isNullOrBlank()) {
-                    Toast.makeText(requireContext(), err, Toast.LENGTH_SHORT).show()
+            viewModel.error.collectLatest { error ->
+                if (!error.isNullOrBlank()) {
+                    Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -68,5 +82,10 @@ class LogInFragment : Fragment() {
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

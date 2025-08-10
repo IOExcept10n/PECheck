@@ -33,15 +33,32 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
-    // CameraX/ML Kit removed due to repository access issues; using external scanner intent fallback
-    // implementation("androidx.camera:camera-core:1.4.0-beta03")
-    // implementation("androidx.camera:camera-camera2:1.4.0-beta03")
-    // implementation("androidx.camera:camera-lifecycle:1.4.0-beta03")
-    // implementation("androidx.camera:camera-view:1.4.0-beta03")
-    // implementation(libs.mlkit.barcode.scanning)
+    // CameraX для встроенного QR-сканера
+    implementation("androidx.camera:camera-core:1.4.0-beta03")
+    implementation("androidx.camera:camera-camera2:1.4.0-beta03")
+    implementation("androidx.camera:camera-lifecycle:1.4.0-beta03")
+    implementation("androidx.camera:camera-view:1.4.0-beta03")
+    
+    // ML Kit для распознавания QR-кодов
+    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+    
+    // QR код генерация
+    implementation("com.google.zxing:core:3.5.2")
+    
+    // Material Design 3
+    implementation("com.google.android.material:material:1.12.0")
+    
+    // ViewPager2 для слайдеров
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+    
+    // Lottie для анимаций
+    implementation("com.airbnb.android:lottie:6.4.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
