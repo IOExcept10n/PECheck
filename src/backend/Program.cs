@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Text;
 using backend.Auth;
 using backend.Data;
@@ -22,7 +23,7 @@ builder.Services.AddSwaggerGen(c =>
     { 
         Title = "Physical Education Attendance API", 
         Version = "v1",
-        Description = "API for tracking student attendance in physical education sections",
+        Description = "API for tracking student attendance in physical education sections. This API provides functionality for managing students, teachers, sections, attendance tracking, and grading.",
         Contact = new OpenApiContact
         {
             Name = "Admin",
@@ -33,7 +34,7 @@ builder.Services.AddSwaggerGen(c =>
     // Define JWT Bearer authentication scheme for Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer {token}' in the text input below.",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -54,6 +55,18 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    // Set the comments path for the Swagger JSON and UI
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+
+    // Configure swagger to use the full schema name to avoid naming conflicts
+    c.CustomSchemaIds(type => type.FullName);
+
+    // Group endpoints by controller
+    c.TagActionsBy(api => new[] { api.GroupName ?? api.ActionDescriptor.RouteValues["controller"] });
+    c.DocInclusionPredicate((docName, apiDesc) => true);
 });
 
 // Configure SQLite database
@@ -139,6 +152,9 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "PE Check API v1");
         c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+        c.DefaultModelsExpandDepth(-1); // Hide schemas section by default
+        c.DisplayRequestDuration();
     });
     app.UseExceptionHandler("/error-development");
 }
