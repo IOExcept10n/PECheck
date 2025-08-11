@@ -1,186 +1,283 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import { useStudentsStore } from '../stores/students'
-import { useTeachersStore } from '../stores/teachers'
-import QRCode from 'qrcode.vue'
 
-const auth = useAuthStore()
-const studentsStore = useStudentsStore()
-const teachersStore = useTeachersStore()
-const router = useRouter()
+// Mock data
+const user = {
+  avatar: 'https://i.pravatar.cc/150?img=32',
+  firstName: 'Иван',
+  lastName: 'Иванов',
+  middleName: 'Иванович',
+  group: 'ПИ-201',
+  faculty: 'Институт информационных технологий'
+}
 
-// Check if user is authenticated, if not redirect to login
-onMounted(() => {
-  if (!auth.isAuthenticated && !auth.checkSavedAuth()) {
-    router.push('/login')
-  }
-})
-
-// Get student or teacher data based on the user role
-const userData = computed(() => {
-  if (auth.user?.role === 'student') {
-    return studentsStore.getStudentById(auth.user.id)
-  } else if (auth.user?.role === 'teacher') {
-    return teachersStore.getTeacherById(auth.user.id)
-  }
-  return null
-})
+const section = {
+  name: 'Баскетбол',
+  description: 'Тренировки по баскетболу для всех уровней подготовки',
+  price: 2000,
+  attendance: 85
+}
 </script>
 
 <template>
-  <v-container v-if="auth.isAuthenticated">
-    <v-row>
-      <v-col cols="12" md="4">
-        <v-card>
-          <v-card-title>Profile</v-card-title>
-          <v-card-text class="text-center">
-            <v-avatar size="150" color="primary">
-              <v-icon size="100" color="white">mdi-account</v-icon>
-            </v-avatar>
-            
-            <h2 class="mt-4">{{ auth.user?.name }}</h2>
-            <p class="text-subtitle-1">{{ auth.user?.role?.charAt(0).toUpperCase() + auth.user?.role?.slice(1) }}</p>
-            <p>ID: {{ auth.user?.id }}</p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      
-      <v-col cols="12" md="4">
-        <v-card>
-          <v-card-title>Your QR Code</v-card-title>
-          <v-card-text class="d-flex justify-center">
-            <QRCode :value="auth.user?.id || ''" :size="200" level="H" />
-          </v-card-text>
-          <v-card-text class="text-center">
-            <p>Your QR code contains your ID: {{ auth.user?.id }}</p>
-            <p v-if="auth.user?.role === 'student'">Show this QR code to your teacher to mark attendance</p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      
-      <v-col cols="12" md="4">
-        <v-card v-if="auth.user?.role === 'student' && userData">
-          <v-card-title>Student Information</v-card-title>
-          <v-card-text>
-            <v-list>
-              <v-list-item>
-                <template v-slot:prepend>
-                  <v-icon>mdi-account-group</v-icon>
-                </template>
-                <v-list-item-title>Group: {{ userData.group }}</v-list-item-title>
-              </v-list-item>
-              
-              <v-list-item>
-                <template v-slot:prepend>
-                  <v-icon>mdi-clipboard-list</v-icon>
-                </template>
-                <v-list-item-title>Section: {{ userData.section }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-            
-            <v-divider class="my-4"></v-divider>
-            
-            <h3 class="text-h6 mb-2">Normative Results</h3>
-            <v-list>
-              <v-list-item v-for="(value, key) in userData.normativeResults" :key="key">
-                <v-list-item-title>{{ key }}: {{ value }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-            
-            <v-divider class="my-4"></v-divider>
-            
-            <h3 class="text-h6 mb-2">Recent Attendance</h3>
-            <v-list>
-              <v-list-item v-for="(attendance, index) in userData.attendances.slice(-3)" :key="index">
-                <v-list-item-title>
-                  {{ new Date(attendance.date).toLocaleDateString() }}:
-                  <v-chip
-                    :color="attendance.present ? 'success' : 'error'"
-                    size="small"
-                    class="ml-2"
-                  >
-                    {{ attendance.present ? 'Present' : 'Absent' }}
-                  </v-chip>
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-        
-        <v-card v-else-if="auth.user?.role === 'teacher' && userData">
-          <v-card-title>Teacher Information</v-card-title>
-          <v-card-text>
-            <v-list>
-              <v-list-item>
-                <template v-slot:prepend>
-                  <v-icon>mdi-email</v-icon>
-                </template>
-                <v-list-item-title>Email: {{ userData.email }}</v-list-item-title>
-              </v-list-item>
-              
-              <v-list-item>
-                <template v-slot:prepend>
-                  <v-icon>mdi-phone</v-icon>
-                </template>
-                <v-list-item-title>Phone: {{ userData.phone }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-            
-            <v-divider class="my-4"></v-divider>
-            
-            <h3 class="text-h6 mb-2">Sections</h3>
-            <v-chip-group>
-              <v-chip
-                v-for="section in userData.sections"
-                :key="section"
-                color="primary"
-                class="ma-1"
-              >
-                {{ section }}
-              </v-chip>
-            </v-chip-group>
-          </v-card-text>
-        </v-card>
-        
-        <v-card v-else-if="auth.user?.role === 'admin'">
-          <v-card-title>Admin Dashboard</v-card-title>
-          <v-card-text>
-            <v-list>
-              <v-list-item to="/students">
-                <template v-slot:prepend>
-                  <v-icon>mdi-account-group</v-icon>
-                </template>
-                <v-list-item-title>Manage Students</v-list-item-title>
-              </v-list-item>
-              
-              <v-list-item to="/teachers">
-                <template v-slot:prepend>
-                  <v-icon>mdi-teach</v-icon>
-                </template>
-                <v-list-item-title>Manage Teachers</v-list-item-title>
-              </v-list-item>
-              
-              <v-list-item to="/sections">
-                <template v-slot:prepend>
-                  <v-icon>mdi-clipboard-list</v-icon>
-                </template>
-                <v-list-item-title>Manage Sections</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-    
-    <v-row v-if="auth.user?.role === 'student'">
-      <v-col cols="12">
-        <v-btn color="primary" block @click="router.push('/calendar')">
-          View Your Calendar
-          <v-icon right>mdi-calendar</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div class="profile-page">
+    <!-- User Info Card -->
+    <div class="profile-card card">
+      <div class="profile-header">
+        <div class="avatar">
+          <img :src="user.avatar" :alt="user.firstName">
+        </div>
+        <div class="user-info">
+          <h2>{{ user.lastName }} {{ user.firstName }} {{ user.middleName }}</h2>
+          <div class="user-details">
+            <p><i class="material-icons">school</i> {{ user.group }}</p>
+            <p><i class="material-icons">account_balance</i> {{ user.faculty }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Info Card -->
+    <div class="section-card card">
+      <h3><i class="material-icons">sports_basketball</i> Моя секция</h3>
+      <div class="section-info">
+        <div class="section-header">
+          <div>
+            <h4>{{ section.name }}</h4>
+            <p class="section-description">{{ section.description }}</p>
+          </div>
+          <div class="price">{{ section.price }} ₽/мес</div>
+        </div>
+        <div class="attendance">
+          <div class="attendance-header">
+            <span>Посещаемость</span>
+            <span class="attendance-percent">{{ section.attendance }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              :style="{ width: `${section.attendance}%` }"
+              :class="{
+                'high': section.attendance >= 80,
+                'medium': section.attendance >= 60 && section.attendance < 80,
+                'low': section.attendance < 60
+              }"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.card {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Profile Card */
+.profile-card {
+  padding: 2rem;
+}
+
+.profile-header {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  flex-shrink: 0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-info h2 {
+  margin: 0 0 1rem;
+  color: var(--text-color);
+  font-size: 1.5rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user-details p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.user-details i {
+  color: var(--primary-color);
+  font-size: 1.25rem;
+}
+
+/* Section Card */
+.section-card {
+  padding: 1.5rem;
+}
+
+.section-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+  color: var(--text-color);
+  font-size: 1.25rem;
+}
+
+.section-card h3 i {
+  color: var(--primary-color);
+}
+
+.section-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.section-header h4 {
+  margin: 0 0 0.5rem;
+  color: var(--text-color);
+  font-size: 1.125rem;
+}
+
+.section-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.price {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+.attendance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.attendance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.attendance-percent {
+  font-weight: 600;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.high {
+  background-color: var(--success-color);
+}
+
+.progress-fill.medium {
+  background-color: var(--warning-color);
+}
+
+.progress-fill.low {
+  background-color: var(--error-color);
+}
+
+/* Dark mode */
+:global(.dark-mode) .card {
+  background-color: var(--surface-dark);
+}
+
+:global(.dark-mode) .user-info h2,
+:global(.dark-mode) .section-card h3,
+:global(.dark-mode) .section-header h4 {
+  color: var(--text-dark);
+}
+
+:global(.dark-mode) .user-details p,
+:global(.dark-mode) .section-description,
+:global(.dark-mode) .attendance-header {
+  color: var(--text-muted-dark);
+}
+
+:global(.dark-mode) .progress-bar {
+  background-color: var(--border-dark);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .user-details {
+    align-items: center;
+  }
+
+  .section-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .price {
+    margin-top: 0.5rem;
+  }
+}
+</style>

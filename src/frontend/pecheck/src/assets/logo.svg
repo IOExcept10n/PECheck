@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>PE Check Logo</title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle fill="#275886" cx="100" cy="100" r="100"></circle>
+        <path d="M60,60 L140,60 C146.627,60 152,65.373 152,72 L152,128 C152,134.627 146.627,140 140,140 L60,140 C53.373,140 48,134.627 48,128 L48,72 C48,65.373 53.373,60 60,60 Z" stroke="#FFFFFF" stroke-width="6"></path>
+        <path d="M65,80 L90,80 C93.866,80 97,83.134 97,87 L97,113 C97,116.866 93.866,120 90,120 L65,120 C61.134,120 58,116.866 58,113 L58,87 C58,83.134 61.134,80 65,80 Z" fill="#FFFFFF"></path>
+        <path d="M110,80 L135,80 C138.866,80 142,83.134 142,87 L142,113 C142,116.866 138.866,120 135,120 L110,120 C106.134,120 103,116.866 103,113 L103,87 C103,83.134 106.134,80 110,80 Z" fill="#FFFFFF"></path>
+        <path d="M75,100 L75,140" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"></path>
+        <path d="M125,100 L125,140" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"></path>
+    </g>
+</svg>

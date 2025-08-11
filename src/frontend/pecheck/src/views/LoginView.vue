@@ -1,190 +1,276 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import { useTheme } from 'vuetify'
 
-const auth = useAuthStore()
-const router = useRouter()
-const theme = useTheme()
-
-const username = ref('')
+const email = ref('')
 const password = ref('')
-const rememberMe = ref(true)
-const error = ref('')
 const loading = ref(false)
+const errorMessage = ref('')
+const router = useRouter()
 
-// Simple regex validation
-const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/
-const passwordRegex = /^.{6,}$/
-
-// If already logged in, redirect to home
-onMounted(() => {
-  if (auth.isAuthenticated || auth.checkSavedAuth()) {
-    router.push('/')
-  }
-  
-  // Set theme from localStorage or default to light
-  const savedTheme = localStorage.getItem('theme') || 'light'
-  theme.global.name.value = savedTheme
-})
-
-// Toggle theme
-function toggleTheme() {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
-  localStorage.setItem('theme', theme.global.name.value)
-}
-
-function isFormValid() {
-  if (!usernameRegex.test(username.value)) {
-    error.value = 'Username must be 3-20 characters and contain only letters, numbers, and underscores'
-    return false
-  }
-  
-  if (!passwordRegex.test(password.value)) {
-    error.value = 'Password must be at least 6 characters'
-    return false
-  }
-  
-  return true
-}
-
-function handleLogin() {
-  error.value = ''
-  
-  if (!isFormValid()) {
+// Login function
+const login = async () => {
+  if (!email.value || !password.value) {
+    errorMessage.value = 'Пожалуйста, введите email и пароль'
     return
   }
   
   loading.value = true
+  errorMessage.value = ''
   
-  // Simulate network delay
-  setTimeout(() => {
-    const success = auth.login(username.value, password.value, rememberMe.value)
-    
-    if (success) {
-      router.push('/')
+  try {
+    // Mock login for demonstration
+    if (email.value.includes('student')) {
+      localStorage.setItem('token', 'mock-student-token')
+      localStorage.setItem('userRole', 'Student')
+      router.push('/student')
+    } else if (email.value.includes('teacher')) {
+      localStorage.setItem('token', 'mock-teacher-token')
+      localStorage.setItem('userRole', 'Teacher')
+      router.push('/teacher')
+    } else if (email.value.includes('admin')) {
+      localStorage.setItem('token', 'mock-admin-token')
+      localStorage.setItem('userRole', 'Moderator')
+      router.push('/moderator')
     } else {
-      error.value = 'Invalid username or password'
+      errorMessage.value = 'Неверный email. Используйте демо-аккаунты, указанные ниже.'
     }
-    
+  } catch (error: any) {
+    errorMessage.value = error.message || 'Произошла непредвиденная ошибка'
+  } finally {
     loading.value = false
-  }, 1000)
+  }
+}
+
+// Demo login functions
+const loginAsStudent = () => {
+  email.value = 'student@example.com'
+  password.value = 'password'
+  login()
+}
+
+const loginAsTeacher = () => {
+  email.value = 'teacher@example.com'
+  password.value = 'password'
+  login()
+}
+
+const loginAsAdmin = () => {
+  email.value = 'admin@example.com'
+  password.value = 'password'
+  login()
 }
 </script>
 
 <template>
-  <v-app>
-    <v-app-bar color="primary" dark>
-      <v-toolbar-title>PE Check</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="toggleTheme">
-        <v-icon>{{ theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-moon-waxing-crescent' }}</v-icon>
-      </v-btn>
-    </v-app-bar>
-    
-    <v-main>
-      <v-container class="fill-height" fluid>
-        <v-row align="center" justify="center">
-          <v-col cols="12" sm="8" md="6" lg="4">
-            <v-card class="elevation-12">
-              <v-card-title class="text-center text-h4 pt-6">
-                Login to PE Check
-              </v-card-title>
-              
-              <v-card-text>
-                <v-alert v-if="error" type="error" dense class="mb-4">{{ error }}</v-alert>
-                <v-form @submit.prevent="handleLogin">
-                  <v-text-field
-                    v-model="username"
-                    label="Username"
-                    name="username"
-                    prepend-icon="mdi-account"
-                    type="text"
-                    :rules="[v => !!v || 'Username is required', v => usernameRegex.test(v) || 'Invalid username format']"
-                    variant="outlined"
-                    class="mb-4"
-                  ></v-text-field>
-
-                  <v-text-field
-                    v-model="password"
-                    label="Password"
-                    name="password"
-                    prepend-icon="mdi-lock"
-                    type="password"
-                    :rules="[v => !!v || 'Password is required', v => passwordRegex.test(v) || 'Password must be at least 6 characters']"
-                    variant="outlined"
-                    class="mb-4"
-                  ></v-text-field>
-
-                  <v-checkbox
-                    v-model="rememberMe"
-                    label="Remember me"
-                    required
-                    class="mb-4"
-                  ></v-checkbox>
-                </v-form>
-                
-                <v-btn 
-                  color="primary" 
-                  size="large" 
-                  block 
-                  @click="handleLogin"
-                  :loading="loading"
-                  class="mb-4"
-                >
-                  Login
-                </v-btn>
-                
-                <v-divider class="my-4"></v-divider>
-                
-                <div class="text-subtitle-1 mb-2">
-                  <p>Note: Registration is handled by moderators only.</p>
-                </div>
-                
-                <v-expansion-panels variant="accordion">
-                  <v-expansion-panel>
-                    <v-expansion-panel-title>Demo Credentials</v-expansion-panel-title>
-                    <v-expansion-panel-text>
-                      <v-list density="compact">
-                        <v-list-item>
-                          <v-list-item-title>
-                            <strong>Student:</strong> username: "student", password: "password"
-                          </v-list-item-title>
-                        </v-list-item>
-                        <v-list-item>
-                          <v-list-item-title>
-                            <strong>Teacher:</strong> username: "teacher", password: "password"
-                          </v-list-item-title>
-                        </v-list-item>
-                        <v-list-item>
-                          <v-list-item-title>
-                            <strong>Admin:</strong> username: "admin", password: "password"
-                          </v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </v-expansion-panel-text>
-                  </v-expansion-panel>
-                </v-expansion-panels>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-main>
-    
-    <v-footer app>
-      <div>&copy; {{ new Date().getFullYear() }} PE Check - Student Management System</div>
-    </v-footer>
-  </v-app>
+  <div class="login-page">
+    <div class="login-container glass">
+      <div class="login-header">
+        <div class="logo">
+          <h1>Вход</h1>
+        </div>
+      </div>
+      
+      <div class="login-form-container">
+        <div v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+        
+        <form @submit.prevent="login" class="login-form">
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              class="form-input"
+              placeholder="Введите email"
+              required
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="password" class="form-label">Пароль</label>
+            <input
+              id="password"
+              v-model="password"
+              type="password"
+              class="form-input"
+              placeholder="Введите пароль"
+              required
+            />
+          </div>
+          
+          <div class="form-actions">
+            <div class="remember-me">
+              <input type="checkbox" id="remember" />
+              <label for="remember">Запомнить меня</label>
+            </div>
+            <a href="#" class="forgot-password">Забыли пароль?</a>
+          </div>
+          
+          <button type="submit" class="btn btn-primary login-btn" :disabled="loading">
+            <span v-if="loading">Вход...</span>
+            <span v-else>Войти</span>
+          </button>
+        </form>
+        
+        <div class="demo-logins">
+          <h3>Демо-аккаунты</h3>
+          <div class="demo-buttons">
+            <button class="btn btn-demo" @click="loginAsStudent">
+              Войти как студент
+            </button>
+            <button class="btn btn-demo" @click="loginAsTeacher">
+              Войти как преподаватель
+            </button>
+            <button class="btn btn-demo" @click="loginAsAdmin">
+              Войти как администратор
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.v-card {
-  border-radius: 12px;
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #a8c8e8 0%, #275886 100%);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,.075)' fill-rule='evenodd'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #a8c8e8 0%, #275886 100%);
+  padding: 2rem;
 }
 
-.v-main {
-  background: linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.2) 100%);
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.login-header {
+  text-align: center;
+  padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.logo h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-align: center;
+  margin: 0;
+}
+
+.login-form-container {
+  padding: 0 2rem 2rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.forgot-password {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.error-message {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+}
+
+.demo-logins {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.demo-logins h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.demo-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn-demo {
+  padding: 0.75rem;
+  background-color: rgba(39, 88, 134, 0.1);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-demo:hover {
+  background-color: rgba(39, 88, 134, 0.2);
+}
+
+/* Glass effect enhancement */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    border-radius: 0;
+    height: 100vh;
+    max-width: 100%;
+  }
+  
+  .login-page {
+    padding: 0;
+  }
 }
 </style>
